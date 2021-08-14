@@ -130,13 +130,6 @@ type Shipping struct {
 	UpdatedAt             time.Time `json:"-" db:"updated_at"`
 }
 
-type Category struct {
-	ID                 int    `json:"id" db:"id"`
-	ParentID           int    `json:"parent_id" db:"parent_id"`
-	CategoryName       string `json:"category_name" db:"category_name"`
-	ParentCategoryName string `json:"parent_category_name,omitempty" db:"-"`
-}
-
 type reqInitialize struct {
 	PaymentServiceURL  string `json:"payment_service_url"`
 	ShipmentServiceURL string `json:"shipment_service_url"`
