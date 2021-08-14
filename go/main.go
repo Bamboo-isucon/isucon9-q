@@ -290,11 +290,11 @@ func main() {
 	mux := goji.NewMux()
 
 	//pprof
-	mux.HandleFunc("/debug/pprof/", pprof.Index)
-    mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-    mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-    mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-    mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	mux.HandleFunc(pat.Get("/debug/pprof/"), pprof.Index)
+    mux.HandleFunc(pat.Get("/debug/pprof/cmdline"), pprof.Cmdline)
+    mux.HandleFunc(pat.Get("/debug/pprof/profile"), pprof.Profile)
+    mux.HandleFunc(pat.Get("/debug/pprof/symbol"), pprof.Symbol)
+    mux.HandleFunc(pat.Get("/debug/pprof/trace"), pprof.Trace)
 
 	// API
 	mux.HandleFunc(pat.Post("/initialize"), postInitialize)
