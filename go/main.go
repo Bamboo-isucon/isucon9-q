@@ -16,7 +16,7 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	_ "net/http/pprof"
+	"net/http/pprof"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
 	goji "goji.io"
