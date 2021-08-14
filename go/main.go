@@ -131,13 +131,6 @@ type Shipping struct {
 	UpdatedAt             time.Time `json:"-" db:"updated_at"`
 }
 
-type Category struct {
-	ID                 int    `json:"id" db:"id"`
-	ParentID           int    `json:"parent_id" db:"parent_id"`
-	CategoryName       string `json:"category_name" db:"category_name"`
-	ParentCategoryName string `json:"parent_category_name,omitempty" db:"-"`
-}
-
 type reqInitialize struct {
 	PaymentServiceURL  string `json:"payment_service_url"`
 	ShipmentServiceURL string `json:"shipment_service_url"`
@@ -574,14 +567,14 @@ func postBuy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	category, err := getCategoryByID(tx, targetItem.CategoryID)
-	if err != nil {
-		log.Print(err)
+	category := getCategoryByID2(targetItem.CategoryID)
+	// if err != nil {
+	// 	log.Print(err)
 
-		outputErrorMsg(w, http.StatusInternalServerError, "category id error")
-		tx.Rollback()
-		return
-	}
+	// 	outputErrorMsg(w, http.StatusInternalServerError, "category id error")
+	// 	tx.Rollback()
+	// 	return
+	// }
 
 	result, err := tx.Exec("INSERT INTO `transaction_evidences` (`seller_id`, `buyer_id`, `status`, `item_id`, `item_name`, `item_price`, `item_description`,`item_category_id`,`item_root_category_id`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		targetItem.SellerID,
@@ -1172,8 +1165,13 @@ func postSell(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	category, err := getCategoryByID(dbx, categoryID)
-	if err != nil || category.ParentID == 0 {
+	category := getCategoryByID2(categoryID)
+	// if err != nil || category.ParentID == 0 {
+	// 	log.Print(categoryID, category)
+	// 	outputErrorMsg(w, http.StatusBadRequest, "Incorrect category ID")
+	// 	return
+	// }
+	if category.ParentID == 0 {
 		log.Print(categoryID, category)
 		outputErrorMsg(w, http.StatusBadRequest, "Incorrect category ID")
 		return
