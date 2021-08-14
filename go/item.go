@@ -89,7 +89,7 @@ func getNewItems(w http.ResponseWriter, r *http.Request) {
 	if itemID > 0 && createdAt > 0 {
 		// paging
 		err := dbx.Select(&sellerItems,
-			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, u.`account_name`, u.`num_sell_items` FROM `items` AS i INNER JOIN `users` AS u ON i.`seller_id` ON u.`id` WHERE i.`status` IN (?,?) AND (i.`created_at` < ?  OR (i.`created_at` <= ? AND i.`id` < ?)) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
+			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, u.`account_name`, u.`num_sell_items` FROM `items` AS i INNER JOIN `users` AS u ON i.`seller_id` = u.`id` WHERE i.`status` IN (?,?) AND (i.`created_at` < ?  OR (i.`created_at` <= ? AND i.`id` < ?)) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
 			ItemStatusOnSale,
 			ItemStatusSoldOut,
 			time.Unix(createdAt, 0),
@@ -105,7 +105,7 @@ func getNewItems(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// 1st page
 		err := dbx.Select(&sellerItems,
-			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, u.`account_name`, u.`num_sell_items` FROM `items` AS i INNER JOIN `users` AS u ON i.`seller_id` ON u.`id` WHERE i.`status` IN (?,?) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
+			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, u.`account_name`, u.`num_sell_items` FROM `items` AS i INNER JOIN `users` AS u ON i.`seller_id` = u.`id` WHERE i.`status` IN (?,?) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
 			ItemStatusOnSale,
 			ItemStatusSoldOut,
 			ItemsPerPage+1,
@@ -211,7 +211,7 @@ func getNewCategoryItems(w http.ResponseWriter, r *http.Request) {
 	if itemID > 0 && createdAt > 0 {
 		// paging
 		inQuery, inArgs, err = sqlx.In(
-			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, u.`account_name`, u.`num_sell_items` FROM `items` AS i INNER JOIN `users` AS u ON i.`seller_id` ON u.`id` WHERE i.`status` IN (?,?) AND i.`category_id` IN (?) AND (i.`created_at` < ?  OR (i.`created_at` <= ? AND i.`id` < ?)) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
+			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, u.`account_name`, u.`num_sell_items` FROM `items` AS i INNER JOIN `users` AS u ON i.`seller_id` = u.`id` WHERE i.`status` IN (?,?) AND i.`category_id` IN (?) AND (i.`created_at` < ?  OR (i.`created_at` <= ? AND i.`id` < ?)) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
 			ItemStatusOnSale,
 			ItemStatusSoldOut,
 			categoryIDs,
@@ -228,7 +228,7 @@ func getNewCategoryItems(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// 1st page
 		inQuery, inArgs, err = sqlx.In(
-			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, u.`account_name`, u.`num_sell_items` FROM `items` AS i INNER JOIN `users` AS u ON i.`seller_id` ON u.`id` WHERE i.`status` IN (?,?) AND i.`category_id` IN (?) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
+			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, u.`account_name`, u.`num_sell_items` FROM `items` AS i INNER JOIN `users` AS u ON i.`seller_id` = u.`id` WHERE i.`status` IN (?,?) AND i.`category_id` IN (?) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
 			ItemStatusOnSale,
 			ItemStatusSoldOut,
 			categoryIDs,
