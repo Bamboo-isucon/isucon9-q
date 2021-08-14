@@ -75,12 +75,11 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tx := dbx.MustBegin()
-	items := []Item{}
 	itemMaps := []ItemMap{}
 	if itemID > 0 && createdAt > 0 {
 		// paging
-		err := tx.Select(&items,
-			"SELECT * FROM `items` WHERE (`seller_id` = ? OR `buyer_id` = ?) AND `status` IN (?,?,?,?,?) AND (`created_at` < ?  OR (`created_at` <= ? AND `id` < ?)) ORDER BY `created_at` DESC, `id` DESC LIMIT ?",
+		err := tx.Select(&itemMaps,
+			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, us.`account_name` AS seller_account_name, us.`num_sell_items` AS seller_num_sell_items, ub.`account_name` AS buyer_account_name, ub.`num_sell_items` AS buyer_num_sell_item, t.`id` AS transaction_evidence_id, t.`status` AS transaction_evidence_status, s.`reserve_id` FROM `items` AS i INNER JOIN `users` AS us ON i.`seller_id` = us.`id` INNER JOIN `users` AS ub ON i.`buyer_id` = ub.`id` INNER JOIN `transaction_evidences` AS t ON i.`id` = t.`item_id` INNER JOIN `shippings` AS s ON s.`transaction_evidence_id` = t.`id` WHERE (i.`seller_id` = ? OR i.`buyer_id` = ?) AND i.`status` IN (?,?,?,?,?) AND (i.`created_at` < ?  OR (i.`created_at` <= ? AND i.`id` < ?)) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
 			user.ID,
 			user.ID,
 			ItemStatusOnSale,
@@ -102,7 +101,7 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// 1st page
 		err := tx.Select(&itemMaps,
-			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, us.`account_name` AS seller_account_name, us.`num_sell_items` AS seller_num_sell_items, ub.`account_name` AS buyer_account_name, ub.`num_sell_items` AS buyer_num_sell_item, t.`id` AS transaction_evidence_id, t.`status` AS transaction_evidence_status, s.`reserve_id` FROM `items` AS i INNER JOIN `users` AS us ON i.`seller_id` = us.`id` INNER JOIN `users` AS ub ON i.`buyer_id` = ub.`id` INNER JOIN `transaction_evidences` AS t ON i.`id` = t.`item_id` INNER JOIN `shippings` AS s ON s.`transaction_evidence_id` = t.`id`  WHERE (i.`seller_id` = ? OR i.`buyer_id` = ?) AND i.`status` IN (?,?,?,?,?) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
+			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, us.`account_name` AS seller_account_name, us.`num_sell_items` AS seller_num_sell_items, ub.`account_name` AS buyer_account_name, ub.`num_sell_items` AS buyer_num_sell_item, t.`id` AS transaction_evidence_id, t.`status` AS transaction_evidence_status, s.`reserve_id` FROM `items` AS i INNER JOIN `users` AS us ON i.`seller_id` = us.`id` INNER JOIN `users` AS ub ON i.`buyer_id` = ub.`id` INNER JOIN `transaction_evidences` AS t ON i.`id` = t.`item_id` INNER JOIN `shippings` AS s ON s.`transaction_evidence_id` = t.`id` WHERE (i.`seller_id` = ? OR i.`buyer_id` = ?) AND i.`status` IN (?,?,?,?,?) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
 			user.ID,
 			user.ID,
 			ItemStatusOnSale,
