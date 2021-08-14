@@ -247,10 +247,6 @@ func init() {
 }
 
 func main() {
-	go func() {
-        log.Println(http.ListenAndServe("localhost:6060", nil))
-    }()
-	
 	host := os.Getenv("MYSQL_HOST")
 	if host == "" {
 		host = "127.0.0.1"
@@ -292,6 +288,13 @@ func main() {
 	defer dbx.Close()
 
 	mux := goji.NewMux()
+
+	//pprof
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+    mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+    mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+    mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+    mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 
 	// API
 	mux.HandleFunc(pat.Post("/initialize"), postInitialize)
