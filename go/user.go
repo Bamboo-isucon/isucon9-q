@@ -79,7 +79,7 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 	if itemID > 0 && createdAt > 0 {
 		// paging
 		err := tx.Select(&itemMaps,
-			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, us.`account_name` AS seller_account_name, us.`num_sell_items` AS seller_num_sell_items, ub.`account_name` AS buyer_account_name, ub.`num_sell_items` AS buyer_num_sell_items, t.`id` AS transaction_evidence_id, t.`status` AS transaction_evidence_status, s.`reserve_id` FROM `items` AS i INNER JOIN `users` AS us ON i.`seller_id` = us.`id` INNER JOIN `users` AS ub ON i.`buyer_id` = ub.`id` INNER JOIN `transaction_evidences` AS t ON i.`id` = t.`item_id` INNER JOIN `shippings` AS s ON s.`transaction_evidence_id` = t.`id` WHERE (i.`seller_id` = ? OR i.`buyer_id` = ?) AND i.`status` IN (?,?,?,?,?) AND (i.`created_at` < ? OR (i.`created_at` <= ? AND i.`id` < ?)) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
+			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, us.`account_name` AS seller_account_name, us.`num_sell_items` AS seller_num_sell_items, ub.`account_name` AS buyer_account_name, ub.`num_sell_items` AS buyer_num_sell_items, t.`id` AS transaction_evidence_id, t.`status` AS transaction_evidence_status, s.`reserve_id` FROM `items` AS i LEFT OUTER JOIN `users` AS us ON i.`seller_id` = us.`id` LEFT OUTER JOIN `users` AS ub ON i.`buyer_id` = ub.`id` LEFT OUTER JOIN `transaction_evidences` AS t ON i.`id` = t.`item_id` LEFT OUTER JOIN `shippings` AS s ON s.`transaction_evidence_id` = t.`id` WHERE (i.`seller_id` = ? OR i.`buyer_id` = ?) AND i.`status` IN (?,?,?,?,?) AND (i.`created_at` < ? OR (i.`created_at` <= ? AND i.`id` < ?)) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
 			user.ID,
 			user.ID,
 			ItemStatusOnSale,
@@ -101,7 +101,7 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// 1st page
 		err := tx.Select(&itemMaps,
-			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, us.`account_name` AS seller_account_name, us.`num_sell_items` AS seller_num_sell_items, ub.`account_name` AS buyer_account_name, ub.`num_sell_items` AS buyer_num_sell_items, t.`id` AS transaction_evidence_id, t.`status` AS transaction_evidence_status, s.`reserve_id` FROM `items` AS i INNER JOIN `users` AS us ON i.`seller_id` = us.`id` INNER JOIN `users` AS ub ON i.`buyer_id` = ub.`id` INNER JOIN `transaction_evidences` AS t ON i.`id` = t.`item_id` INNER JOIN `shippings` AS s ON s.`transaction_evidence_id` = t.`id` WHERE (i.`seller_id` = ? OR i.`buyer_id` = ?) AND i.`status` IN (?,?,?,?,?) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
+			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, us.`account_name` AS seller_account_name, us.`num_sell_items` AS seller_num_sell_items, ub.`account_name` AS buyer_account_name, ub.`num_sell_items` AS buyer_num_sell_items, t.`id` AS transaction_evidence_id, t.`status` AS transaction_evidence_status, s.`reserve_id` FROM `items` AS i LEFT OUTER JOIN `users` AS us ON i.`seller_id` = us.`id` LEFT OUTER JOIN `users` AS ub ON i.`buyer_id` = ub.`id` LEFT OUTER JOIN `transaction_evidences` AS t ON i.`id` = t.`item_id` LEFT OUTER JOIN `shippings` AS s ON s.`transaction_evidence_id` = t.`id` WHERE (i.`seller_id` = ? OR i.`buyer_id` = ?) AND i.`status` IN (?,?,?,?,?) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
 			user.ID,
 			user.ID,
 			ItemStatusOnSale,
@@ -169,13 +169,15 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 		// 	itemDetail.BuyerID = item.BuyerID
 		// 	itemDetail.Buyer = &buyer
 		// }
-		buyer := UserSimple{
-			ID:           itemMap.BuyerID,
-			AccountName:  itemMap.BuyerAccountName,
-			NumSellItems: itemMap.BuyerNumSellItems,
+		if itemMap.BuyerID != 0 {
+			buyer := UserSimple{
+				ID:           itemMap.BuyerID,
+				AccountName:  itemMap.BuyerAccountName,
+				NumSellItems: itemMap.BuyerNumSellItems,
+			}
+			itemDetail.BuyerID = itemMap.BuyerID
+			itemDetail.Buyer = &buyer
 		}
-		itemDetail.BuyerID = itemMap.BuyerID
-		itemDetail.Buyer = &buyer
 
 		// transactionEvidence := TransactionEvidence{}
 		// err = tx.Get(&transactionEvidence, "SELECT * FROM `transaction_evidences` WHERE `item_id` = ?", item.ID)
