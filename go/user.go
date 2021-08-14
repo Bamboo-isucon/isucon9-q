@@ -312,11 +312,11 @@ func getUserItems(w http.ResponseWriter, r *http.Request) {
 
 	itemSimples := []ItemSimple{}
 	for _, item := range items {
-		category, err := getCategoryByID(dbx, item.CategoryID)
-		if err != nil {
-			outputErrorMsg(w, http.StatusNotFound, "category not found")
-			return
-		}
+		category := getCategoryByID2(item.CategoryID)
+		// if err != nil {
+		// 	outputErrorMsg(w, http.StatusNotFound, "category not found")
+		// 	return
+		// }
 		itemSimples = append(itemSimples, ItemSimple{
 			ID:         item.ID,
 			SellerID:   item.SellerID,

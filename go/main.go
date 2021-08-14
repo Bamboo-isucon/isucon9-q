@@ -559,14 +559,14 @@ func postBuy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	category, err := getCategoryByID(tx, targetItem.CategoryID)
-	if err != nil {
-		log.Print(err)
+	category := getCategoryByID2(targetItem.CategoryID)
+	// if err != nil {
+	// 	log.Print(err)
 
-		outputErrorMsg(w, http.StatusInternalServerError, "category id error")
-		tx.Rollback()
-		return
-	}
+	// 	outputErrorMsg(w, http.StatusInternalServerError, "category id error")
+	// 	tx.Rollback()
+	// 	return
+	// }
 
 	result, err := tx.Exec("INSERT INTO `transaction_evidences` (`seller_id`, `buyer_id`, `status`, `item_id`, `item_name`, `item_price`, `item_description`,`item_category_id`,`item_root_category_id`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		targetItem.SellerID,
@@ -1157,8 +1157,13 @@ func postSell(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	category, err := getCategoryByID(dbx, categoryID)
-	if err != nil || category.ParentID == 0 {
+	category := getCategoryByID2(categoryID)
+	// if err != nil || category.ParentID == 0 {
+	// 	log.Print(categoryID, category)
+	// 	outputErrorMsg(w, http.StatusBadRequest, "Incorrect category ID")
+	// 	return
+	// }
+	if category.ParentID == 0 {
 		log.Print(categoryID, category)
 		outputErrorMsg(w, http.StatusBadRequest, "Incorrect category ID")
 		return
