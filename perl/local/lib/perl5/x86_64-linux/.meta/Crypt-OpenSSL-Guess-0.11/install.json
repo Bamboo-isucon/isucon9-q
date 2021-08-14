@@ -1,0 +1,1 @@
+{"version":"0.11","pathname":"A/AK/AKIYM/Crypt-OpenSSL-Guess-0.11.tar.gz","provides":{"Crypt::OpenSSL::Guess":{"file":"lib/Crypt/OpenSSL/Guess.pm","version":"0.11"}},"name":"Crypt::OpenSSL::Guess","target":"Crypt::OpenSSL::Guess","dist":"Crypt-OpenSSL-Guess-0.11"}
