@@ -178,9 +178,9 @@ func getNewCategoryItems(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	var categoryIDs []int
-	for _, v := range categories {
+	for i, v := range categories {
 		if v.ParentID == rootCategory.ID {
-			categoryIDs = append(categoryIDs, v.ParentID)
+			categoryIDs = append(categoryIDs, i)
 		}
 	}
 	// err = dbx.Select(&categoryIDs, "SELECT id FROM `categories` WHERE parent_id=?", rootCategory.ID)
