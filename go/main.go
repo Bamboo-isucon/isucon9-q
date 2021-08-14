@@ -16,6 +16,7 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"net/http/pprof"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
 	goji "goji.io"
@@ -287,6 +288,13 @@ func main() {
 	defer dbx.Close()
 
 	mux := goji.NewMux()
+
+	//pprof
+	mux.HandleFunc(pat.Get("/debug/pprof/"), pprof.Index)
+    mux.HandleFunc(pat.Get("/debug/pprof/cmdline"), pprof.Cmdline)
+    mux.HandleFunc(pat.Get("/debug/pprof/profile"), pprof.Profile)
+    mux.HandleFunc(pat.Get("/debug/pprof/symbol"), pprof.Symbol)
+    mux.HandleFunc(pat.Get("/debug/pprof/trace"), pprof.Trace)
 
 	// API
 	mux.HandleFunc(pat.Post("/initialize"), postInitialize)
