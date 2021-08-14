@@ -84,11 +84,12 @@ func getNewItems(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	items := []Item{}
+	// items := []Item{}
+	sellerItems := []SellerItem{}
 	if itemID > 0 && createdAt > 0 {
 		// paging
-		err := dbx.Select(&items,
-			"SELECT * FROM `items` WHERE `status` IN (?,?) AND (`created_at` < ?  OR (`created_at` <= ? AND `id` < ?)) ORDER BY `created_at` DESC, `id` DESC LIMIT ?",
+		err := dbx.Select(&sellerItems,
+			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, u.`account_name`, u.`num_sell_items` FROM `items` AS i INNER JOIN `users` AS u ON i.`seller_id` ON u.`id` WHERE i.`status` IN (?,?) AND (i.`created_at` < ?  OR (i.`created_at` <= ? AND i.`id` < ?)) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
 			ItemStatusOnSale,
 			ItemStatusSoldOut,
 			time.Unix(createdAt, 0),
@@ -103,8 +104,8 @@ func getNewItems(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// 1st page
-		err := dbx.Select(&items,
-			"SELECT * FROM `items` WHERE `status` IN (?,?) ORDER BY `created_at` DESC, `id` DESC LIMIT ?",
+		err := dbx.Select(&sellerItems,
+			"SELECT i.`id`, i.`seller_id`, i.`buyer_id`, i.`status`, i.`name`, i.`price`, i.`description`, i.`image_name`, i.`category_id`, i.`created_at`, i.`updated_at`, u.`account_name`, u.`num_sell_items` FROM `items` AS i INNER JOIN `users` AS u ON i.`seller_id` ON u.`id` WHERE i.`status` IN (?,?) ORDER BY i.`created_at` DESC, i.`id` DESC LIMIT ?",
 			ItemStatusOnSale,
 			ItemStatusSoldOut,
 			ItemsPerPage+1,
@@ -117,11 +118,16 @@ func getNewItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	itemSimples := []ItemSimple{}
-	for _, item := range items {
-		seller, err := getUserSimpleByID(dbx, item.SellerID)
-		if err != nil {
-			outputErrorMsg(w, http.StatusNotFound, "seller not found")
-			return
+	for _, item := range sellerItems {
+		// seller, err := getUserSimpleByID(dbx, item.SellerID)
+		// if err != nil {
+		// 	outputErrorMsg(w, http.StatusNotFound, "seller not found")
+		// 	return
+		// }
+		seller := UserSimple{
+			ID:           item.SellerID,
+			AccountName:  item.AccountName,
+			NumSellItems: item.NumSellItems,
 		}
 		category := getCategoryByID2(item.CategoryID)
 		// if err != nil {
