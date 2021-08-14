@@ -72,3 +72,8 @@ CREATE TABLE `categories` (
   `parent_id` int unsigned NOT NULL,
   `category_name` varchar(191) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4;
+
+CREATE INDEX items_multi_index ON items(created_at, id);
+CREATE INDEX users_account_name_index ON users(account_name);
+CREATE INDEX transaction_evidences_item_index ON transaction_evidences(item_id);
+CREATE INDEX shippings_transaction_evidence_id_index ON shippings(transaction_evidence_id);
