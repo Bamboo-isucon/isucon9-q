@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -12,24 +13,24 @@ import (
 )
 
 type ItemMap struct {
-	ID                        int64     `json:"id" db:"id"`
-	SellerID                  int64     `json:"seller_id" db:"seller_id"`
-	BuyerID                   int64     `json:"buyer_id" db:"buyer_id"`
-	Status                    string    `json:"status" db:"status"`
-	Name                      string    `json:"name" db:"name"`
-	Price                     int       `json:"price" db:"price"`
-	Description               string    `json:"description" db:"description"`
-	ImageName                 string    `json:"image_name" db:"image_name"`
-	CategoryID                int       `json:"category_id" db:"category_id"`
-	CreatedAt                 time.Time `json:"-" db:"created_at"`
-	UpdatedAt                 time.Time `json:"-" db:"updated_at"`
-	SellerAccountName         string    `json:"seller_account_name" db:"seller_account_name"`
-	SellerNumSellItems        int       `json:"seller_num_sell_items" db:"seller_num_sell_items"`
-	BuyerAccountName          string    `json:"buyer_account_name" db:"buyer_account_name"`
-	BuyerNumSellItems         int       `json:"buyer_num_sell_items" db:"buyer_num_sell_items"`
-	TransactionEvidenceID     int64     `json:"transaction_evidence_id" db:"transaction_evidence_id"`
-	TransactionEvidenceStatus string    `json:"transaction_evidence_status" db:"transaction_evidence_status"`
-	ReserveID                 string    `json:"reserve_id" db:"reserve_id"`
+	ID                        int64          `json:"id" db:"id"`
+	SellerID                  int64          `json:"seller_id" db:"seller_id"`
+	BuyerID                   int64          `json:"buyer_id" db:"buyer_id"`
+	Status                    string         `json:"status" db:"status"`
+	Name                      string         `json:"name" db:"name"`
+	Price                     int            `json:"price" db:"price"`
+	Description               string         `json:"description" db:"description"`
+	ImageName                 string         `json:"image_name" db:"image_name"`
+	CategoryID                int            `json:"category_id" db:"category_id"`
+	CreatedAt                 time.Time      `json:"-" db:"created_at"`
+	UpdatedAt                 time.Time      `json:"-" db:"updated_at"`
+	SellerAccountName         string         `json:"seller_account_name" db:"seller_account_name"`
+	SellerNumSellItems        int            `json:"seller_num_sell_items" db:"seller_num_sell_items"`
+	BuyerAccountName          sql.NullString `json:"buyer_account_name" db:"buyer_account_name"`
+	BuyerNumSellItems         sql.NullInt64  `json:"buyer_num_sell_items" db:"buyer_num_sell_items"`
+	TransactionEvidenceID     sql.NullInt64  `json:"transaction_evidence_id" db:"transaction_evidence_id"`
+	TransactionEvidenceStatus sql.NullString `json:"transaction_evidence_status" db:"transaction_evidence_status"`
+	ReserveID                 sql.NullString `json:"reserve_id" db:"reserve_id"`
 }
 
 func getUserSimpleByID(q sqlx.Queryer, userID int64) (userSimple UserSimple, err error) {
@@ -172,8 +173,8 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 		if itemMap.BuyerID != 0 {
 			buyer := UserSimple{
 				ID:           itemMap.BuyerID,
-				AccountName:  itemMap.BuyerAccountName,
-				NumSellItems: itemMap.BuyerNumSellItems,
+				AccountName:  itemMap.BuyerAccountName.String,
+				NumSellItems: int(itemMap.BuyerNumSellItems.Int64),
 			}
 			itemDetail.BuyerID = itemMap.BuyerID
 			itemDetail.Buyer = &buyer
@@ -189,7 +190,7 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 		// 	return
 		// }
 
-		if itemMap.TransactionEvidenceID > 0 {
+		if itemMap.TransactionEvidenceID.Int64 > 0 {
 			// shipping := Shipping{}
 			// err = tx.Get(&shipping, "SELECT * FROM `shippings` WHERE `transaction_evidence_id` = ?", transactionEvidence.ID)
 			// if err == sql.ErrNoRows {
@@ -204,7 +205,7 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 			// 	return
 			// }
 			ssr, err := APIShipmentStatus(getShipmentServiceURL(), &APIShipmentStatusReq{
-				ReserveID: itemMap.ReserveID,
+				ReserveID: itemMap.ReserveID.String,
 			})
 			if err != nil {
 				log.Print(err)
@@ -213,8 +214,8 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			itemDetail.TransactionEvidenceID = itemMap.TransactionEvidenceID
-			itemDetail.TransactionEvidenceStatus = itemMap.TransactionEvidenceStatus
+			itemDetail.TransactionEvidenceID = itemMap.TransactionEvidenceID.Int64
+			itemDetail.TransactionEvidenceStatus = itemMap.TransactionEvidenceStatus.String
 			itemDetail.ShippingStatus = ssr.Status
 		}
 
