@@ -204,19 +204,40 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 			// 	tx.Rollback()
 			// 	return
 			// }
-			ssr, err := APIShipmentStatus(getShipmentServiceURL(), &APIShipmentStatusReq{
-				ReserveID: itemMap.ReserveID.String,
-			})
-			if err != nil {
-				log.Print(err)
-				outputErrorMsg(w, http.StatusInternalServerError, "failed to request to shipment service")
-				tx.Rollback()
-				return
-			}
 
 			itemDetail.TransactionEvidenceID = itemMap.TransactionEvidenceID.Int64
 			itemDetail.TransactionEvidenceStatus = itemMap.TransactionEvidenceStatus.String
-			itemDetail.ShippingStatus = ssr.Status
+
+			if status := shipmentStatusManager[itemMap.ReserveID.String]; status != nil {
+				if status.Valid {
+					log.Print("use shipment status cache")
+					itemDetail.ShippingStatus = status.Status
+				} else {
+					log.Print("call shipment status api")
+					ssr, err := APIShipmentStatus(getShipmentServiceURL(), &APIShipmentStatusReq{
+						ReserveID: itemMap.ReserveID.String,
+					})
+					if err != nil {
+						log.Print(err)
+						outputErrorMsg(w, http.StatusInternalServerError, "failed to request to shipment service")
+						tx.Rollback()
+						return
+					}
+					itemDetail.ShippingStatus = ssr.Status
+				}
+			} else {
+				log.Print("call shipment status api")
+				ssr, err := APIShipmentStatus(getShipmentServiceURL(), &APIShipmentStatusReq{
+					ReserveID: itemMap.ReserveID.String,
+				})
+				if err != nil {
+					log.Print(err)
+					outputErrorMsg(w, http.StatusInternalServerError, "failed to request to shipment service")
+					tx.Rollback()
+					return
+				}
+				itemDetail.ShippingStatus = ssr.Status
+			}
 		}
 
 		itemDetails = append(itemDetails, itemDetail)

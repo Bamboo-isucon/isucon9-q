@@ -15,8 +15,9 @@ import (
 	"strconv"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"net/http/pprof"
+
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
 	goji "goji.io"
@@ -61,10 +62,18 @@ const (
 )
 
 var (
-	templates *template.Template
-	dbx       *sqlx.DB
-	store     sessions.Store
+	templates             *template.Template
+	dbx                   *sqlx.DB
+	store                 sessions.Store
+	shipmentStatusManager ShipmentStatusManager
 )
+
+type ShipmentStatusManager map[string]*ShipmentStatus
+
+type ShipmentStatus struct {
+	Status string
+	Valid  bool
+}
 
 type Config struct {
 	Name string `json:"name" db:"name"`
@@ -284,10 +293,10 @@ func main() {
 
 	//pprof
 	mux.HandleFunc(pat.Get("/debug/pprof/"), pprof.Index)
-    mux.HandleFunc(pat.Get("/debug/pprof/cmdline"), pprof.Cmdline)
-    mux.HandleFunc(pat.Get("/debug/pprof/profile"), pprof.Profile)
-    mux.HandleFunc(pat.Get("/debug/pprof/symbol"), pprof.Symbol)
-    mux.HandleFunc(pat.Get("/debug/pprof/trace"), pprof.Trace)
+	mux.HandleFunc(pat.Get("/debug/pprof/cmdline"), pprof.Cmdline)
+	mux.HandleFunc(pat.Get("/debug/pprof/profile"), pprof.Profile)
+	mux.HandleFunc(pat.Get("/debug/pprof/symbol"), pprof.Symbol)
+	mux.HandleFunc(pat.Get("/debug/pprof/trace"), pprof.Trace)
 
 	// API
 	mux.HandleFunc(pat.Post("/initialize"), postInitialize)

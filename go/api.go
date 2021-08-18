@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 const (
@@ -179,6 +180,16 @@ func APIShipmentStatus(shipmentURL string, param *APIShipmentStatusReq) (*APIShi
 	if err != nil {
 		return nil, err
 	}
+
+	shipmentStatusManager[param.ReserveID] = &ShipmentStatus{
+		Status: ssr.Status,
+		Valid:  true,
+	}
+
+	go func() {
+		time.Sleep(0 * time.Second)
+		shipmentStatusManager[param.ReserveID].Valid = false
+	}()
 
 	return ssr, nil
 }
