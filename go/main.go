@@ -289,6 +289,8 @@ func main() {
 	}
 	defer dbx.Close()
 
+	shipmentStatusManager = ShipmentStatusManager{}
+
 	mux := goji.NewMux()
 
 	//pprof
