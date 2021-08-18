@@ -187,7 +187,7 @@ func APIShipmentStatus(shipmentURL string, param *APIShipmentStatusReq) (*APIShi
 	}
 
 	go func() {
-		time.Sleep(0 * time.Second)
+		time.Sleep(3 * time.Second)
 		shipmentStatusManager[param.ReserveID].Valid = false
 	}()
 
