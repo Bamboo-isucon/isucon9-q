@@ -15,8 +15,9 @@ import (
 	"strconv"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"net/http/pprof"
+
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
 	goji "goji.io"
@@ -284,10 +285,10 @@ func main() {
 
 	//pprof
 	mux.HandleFunc(pat.Get("/debug/pprof/"), pprof.Index)
-    mux.HandleFunc(pat.Get("/debug/pprof/cmdline"), pprof.Cmdline)
-    mux.HandleFunc(pat.Get("/debug/pprof/profile"), pprof.Profile)
-    mux.HandleFunc(pat.Get("/debug/pprof/symbol"), pprof.Symbol)
-    mux.HandleFunc(pat.Get("/debug/pprof/trace"), pprof.Trace)
+	mux.HandleFunc(pat.Get("/debug/pprof/cmdline"), pprof.Cmdline)
+	mux.HandleFunc(pat.Get("/debug/pprof/profile"), pprof.Profile)
+	mux.HandleFunc(pat.Get("/debug/pprof/symbol"), pprof.Symbol)
+	mux.HandleFunc(pat.Get("/debug/pprof/trace"), pprof.Trace)
 
 	// API
 	mux.HandleFunc(pat.Post("/initialize"), postInitialize)
@@ -437,7 +438,7 @@ func postInitialize(w http.ResponseWriter, r *http.Request) {
 
 	res := resInitialize{
 		// キャンペーン実施時には還元率の設定を返す。詳しくはマニュアルを参照のこと。
-		Campaign: 2,
+		Campaign: 3,
 		// 実装言語を返す
 		Language: "Go",
 	}
